@@ -29,7 +29,7 @@ class QuestionView extends Component {
           questions: result.questions,
           totalQuestions: result.total_questions,
           categories: result.categories,
-          // currentCategory: result.current_category,
+          currentCategory: result.current_category,
         });
         return;
       },

@@ -86,7 +86,7 @@ def create_app(test_config=None):
             'success': True,
             'questions': current_questions,
             'total_questions': len(Question.query.all()), 
-            # 'current_category': None, 
+            'current_category': None, 
             'categories': {category.id: category.type for category in categories}
             })
     """
@@ -121,7 +121,7 @@ def create_app(test_config=None):
                 'success': True,
                 'questions': current_questions,
                 'total_questions': len(Question.query.all()), 
-                # 'current_category': None, 
+                'current_category': None, 
                 'categories': {category.id: category.type for category in categories}
                 })
         except Exception as e:
