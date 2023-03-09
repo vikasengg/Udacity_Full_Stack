@@ -100,8 +100,9 @@ def create_app(test_config=None):
     @app.route('/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
         try:
-            question=Question.query.filter(question_id.id==question_id).one_or_none()
+            question=Question.query.filter(Question.id==question_id).one_or_none()
             if question is None:
+                print ('No questions found for deletion')
                 abort(404)
 
             question.delete()
@@ -111,6 +112,7 @@ def create_app(test_config=None):
             categories = Category.query.order_by(Category.id).all()
 
             if len(current_questions) == 0:
+                print ('No current questions found')
                 abort(404)
             
             # return jsonify ({
@@ -182,9 +184,11 @@ def create_app(test_config=None):
         search_term = body.get("searchTerm", None)
 
         try:
-            selection = Question.query.order_by(Question.id).filter(Question.question.ilike( (f'%{search_term}%')).all())
+            print ('Before Searching')
+            selection = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
+            print ('After Searching')
             current_questions = paginate_questions(request, selection)
-
+            print (current_questions)
             return jsonify(
                 {
                     "success": True,
