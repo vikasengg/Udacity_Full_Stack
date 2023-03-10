@@ -146,7 +146,7 @@ Content :
   "success": true,
   "total_questions": 19
 }
-
+```
 #### DELETE '/questions/<int:question_id>'
 - Deletes a question by question_id using url parameters
 - Returns list of remaining questions, total questions and other details if successful
