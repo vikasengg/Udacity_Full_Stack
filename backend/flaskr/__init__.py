@@ -102,8 +102,7 @@ def create_app(db_URI="", test_config=None):
     def delete_question(question_id):
         question=Question.query.filter(Question.id==question_id).one_or_none()
         if question is None:
-            abort(404)
-
+            abort(422)
         question.delete()
         selection = Question.query.order_by(Question.id).all()
         current_questions = paginate_questions(request, selection)
@@ -170,19 +169,17 @@ def create_app(db_URI="", test_config=None):
         search_term = body.get("searchTerm", None)
 
         selection = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
-        
-        if selection:
-            current_questions = paginate_questions(request, selection)
+        current_questions = paginate_questions(request, selection)
+        if len(current_questions) == 0:
+            abort(404)
+        else:
             return jsonify(
                 {
                     "success": True,
                     "questions": current_questions,
                     "total_questions": len(selection),
                     "current_category": None  
-                })
-        else:                
-            abort(404)
-            
+                })            
     """
     @TODO:
     Create a GET endpoint to get questions based on category.

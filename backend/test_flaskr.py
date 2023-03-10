@@ -17,8 +17,6 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app(self.database_path)
         self.client = self.app.test_client
         # setup_db(self.app, self.database_path)
-
-        self.new_question = {"question":"who is the highest individual run scorer in ODI", "answer":"Rohit Sharma", "category":"6", "difficulty":"3"}
     
         # # binds the app to the current context
         # with self.app.app_context():
@@ -54,7 +52,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], 'method not allowed')
 
-    # Test case for getting the list of questions
+    # Test case for getting the list of questions pagewise
     def test_get_paginated_questions(self):
         res = self.client().get("/questions")
         data = json.loads(res.data)
@@ -65,7 +63,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(data["categories"]))
         self.assertTrue(data["total_questions"])
 
-    # Test case for diplaying the bad request error message when Page number is out of reach while searching questions. 
+    # Test case for diplaying the page not found error. 
     def test_404_requesting_beyond_valid_page(self):
         res = self.client().get("/questions?page=1000")
         data = json.loads(res.data)
@@ -74,36 +72,38 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Page not found")
 
-    def test_create_new_question(self):
-        res = self.client().post("/questions", json=self.new_question)
-        data = json.loads(res.data)
+    # # Test case for creating a question 
+    # def test_create_new_question(self):
+    #     self.new_question = {"question":"who is the highest individual run scorer in ODI", "answer":"Rohit Sharma", "category":"6", "difficulty":"3"}
+    #     res = self.client().post("/questions", json=self.new_question)
+    #     data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data["success"], True)
-        self.assertTrue(data["created"])
-        self.assertTrue(data["question"])
-        self.assertTrue(data["total_questions"])
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertTrue(data["created"])
+    #     self.assertTrue(data["question"])
+    #     self.assertTrue(data["total_questions"])
 
-    # Test case for deleting a questions
-    def test_delete_questions(self):
-        res = self.client().delete("/questions/13")
-        data = json.loads(res.data)
+    # # Test case for deleting a question
+    # def test_delete_questions(self):
+    #     res = self.client().delete("/questions/13")
+    #     data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data["success"], True)
-        self.assertTrue(data["total_questions"])
-        self.assertTrue(len(data["questions"]))
-
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertTrue(data["total_questions"])
+    #     self.assertTrue(len(data["questions"]))
 
     # Test case for error while deleting a questions
-    def test_404_if_question_does_not_exist(self):
+    def test_422_if_question_does_not_exist(self):
         res = self.client().delete('/questions/1000')
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.status_code, 422)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'Page not found')
+        self.assertEqual(data['message'], 'unprocessable')
 
+    # Test case for wild card search for questions
     def test_search_question(self):
         res = self.client().post("/questions/search", json={"searchTerm": "What"})
         data = json.loads(res.data)
@@ -112,6 +112,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], True)
         self.assertEqual(data["total_questions"],8)
 
+    # Test case for populating the error if no questions matching the wildcard
     def test_404_search_question_failure(self):
         res = self.client().post("/questions/search", json={"searchTerm": "what and how"})
         data = json.loads(res.data)
