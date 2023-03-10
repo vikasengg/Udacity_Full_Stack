@@ -12,8 +12,14 @@ class TriviaTestCase(unittest.TestCase):
 
     def setUp(self):
         """Define test variables and initialize app."""
-        self.database_name = "trivia_test"
-        self.database_path = "postgresql://{}:{}@{}/{}".format('student','student','localhost:5432', self.database_name)
+
+        DB_HOST = os.getenv('DB_HOST', 'localhost:5432')  
+        DB_USER = os.getenv('DB_USER', 'student')  
+        DB_PASSWORD = os.getenv('DB_PASSWORD', 'student')  
+        DB_NAME = os.getenv('DB_NAME', 'trivia_test')  
+        DB_PATH = 'postgresql://{}:{}@{}/{}'.format(DB_USER, DB_PASSWORD, DB_HOST, DB_NAME)
+        # self.database_name = "trivia_test"
+        # self.database_path = "postgresql://{}:{}@{}/{}".format('student','student','localhost:5432', self.database_name)
         self.app = create_app(self.database_path)
         self.client = self.app.test_client
         # setup_db(self.app, self.database_path)
