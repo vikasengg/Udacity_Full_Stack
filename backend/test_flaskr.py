@@ -20,7 +20,7 @@ class TriviaTestCase(unittest.TestCase):
         DB_PATH = 'postgresql://{}:{}@{}/{}'.format(DB_USER, DB_PASSWORD, DB_HOST, DB_NAME)
         # self.database_name = "trivia_test"
         # self.database_path = "postgresql://{}:{}@{}/{}".format('student','student','localhost:5432', self.database_name)
-        self.app = create_app(self.database_path)
+        self.app = create_app(DB_PATH)
         self.client = self.app.test_client
         # setup_db(self.app, self.database_path)
     
@@ -78,27 +78,27 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Page not found")
 
-    # # Test case for creating a question 
-    # def test_create_new_question(self):
-    #     self.new_question = {"question":"who is the highest individual run scorer in ODI", "answer":"Rohit Sharma", "category":"6", "difficulty":"3"}
-    #     res = self.client().post("/questions", json=self.new_question)
-    #     data = json.loads(res.data)
+    # Test case for creating a question 
+    def test_create_new_question(self):
+        self.new_question = {"question":"who is the highest individual run scorer in ODI", "answer":"Rohit Sharma", "category":"6", "difficulty":"3"}
+        res = self.client().post("/questions", json=self.new_question)
+        data = json.loads(res.data)
 
-    #     self.assertEqual(res.status_code, 200)
-    #     self.assertEqual(data["success"], True)
-    #     self.assertTrue(data["created"])
-    #     self.assertTrue(data["question"])
-    #     self.assertTrue(data["total_questions"])
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertTrue(data["created"])
+        self.assertTrue(data["question"])
+        self.assertTrue(data["total_questions"])
 
-    # # Test case for deleting a question
-    # def test_delete_questions(self):
-    #     res = self.client().delete("/questions/13")
-    #     data = json.loads(res.data)
+    # Test case for deleting a question
+    def test_delete_questions(self):
+        res = self.client().delete("/questions/28")
+        data = json.loads(res.data)
 
-    #     self.assertEqual(res.status_code, 200)
-    #     self.assertEqual(data["success"], True)
-    #     self.assertTrue(data["total_questions"])
-    #     self.assertTrue(len(data["questions"]))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertTrue(data["total_questions"])
+        self.assertTrue(len(data["questions"]))
 
     # Test case for error while deleting a questions
     def test_422_if_question_does_not_exist(self):
