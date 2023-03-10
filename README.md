@@ -231,8 +231,7 @@ Content :
   "total_questions": 18
 }
 
-
-
+```
 #### POST '/questions'
 - Creates a new question using JSON request parameters in the questions database
 - Sample: `curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"question": "who was the first prime minister of India?", "answer": "Jawahar Lal Nehru", "difficulty": 3, "category": "4" }'`
@@ -335,6 +334,7 @@ Output JSON:
   "total_questions": 19
 }
 
+```
 #### POST '/questions/search'
 - Searches for questions using a search term given by a User. The search performed is Case insensitive. 
 - Returns a JSON object with paginated questions matching the search term
@@ -362,7 +362,7 @@ Output JSON:
   "total_questions": 2
 }
 
-
+```
 #### GET '/categories/<int:category_id>/questions'
 - Gets all questions in a specified category by category_id using url parameters
 - Returns a JSON object with paginated questions from a specified category
@@ -396,8 +396,8 @@ Output JSON:
   "success": true, 
   "total_questions": 19
 }
-```
 
+```
 #### POST '/quizzes'
 - Allows user to play the trivia game
 - Uses JSON request parameters of a chosen category and previous questions
