@@ -19,10 +19,13 @@ def paginate_questions(request, selection):
     return current_questions
 
 
-def create_app(test_config=None):
+def create_app(db_URI="", test_config=None):
     # create and configure the app
     app = Flask(__name__)
-    setup_db(app)
+    if db_URI:
+        setup_db(app,db_URI)
+    else:
+        setup_db(app)
 
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
@@ -52,11 +55,11 @@ def create_app(test_config=None):
     def retrieve_categories():
         categories = Category.query.order_by(Category.id).all()
         # categories = [category.format() for category in selection]  
-
         return jsonify ({
             'success': True,
             'categories': {category.id: category.type for category in categories}
-            })
+        })
+            
     """
     @TODO:
     Create an endpoint to handle GET requests for questions,
@@ -76,12 +79,9 @@ def create_app(test_config=None):
         selection = Question.query.order_by(Question.id).all()
         current_questions = paginate_questions(request, selection)
 
-        categories = Category.query.order_by(Category.id).all()
-        # categories = [category.format() for category in selection]  
-
         if len(current_questions) == 0:
             abort(404)
-        
+        categories = Category.query.order_by(Category.id).all()
         return jsonify ({
             'success': True,
             'questions': current_questions,
@@ -89,6 +89,7 @@ def create_app(test_config=None):
             'current_category': None, 
             'categories': {category.id: category.type for category in categories}
             })
+  
     """
     @TODO:
     Create an endpoint to DELETE question using a question ID.
@@ -99,36 +100,23 @@ def create_app(test_config=None):
     """
     @app.route('/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
-        try:
-            question=Question.query.filter(Question.id==question_id).one_or_none()
-            if question is None:
-                print ('No questions found for deletion')
-                abort(404)
+        question=Question.query.filter(Question.id==question_id).one_or_none()
+        if question is None:
+            abort(404)
 
-            question.delete()
-            selection = Question.query.order_by(Question.id).all()
-            current_questions = paginate_questions(request, selection)
+        question.delete()
+        selection = Question.query.order_by(Question.id).all()
+        current_questions = paginate_questions(request, selection)
 
-            categories = Category.query.order_by(Category.id).all()
+        categories = Category.query.order_by(Category.id).all()
 
-            if len(current_questions) == 0:
-                print ('No current questions found')
-                abort(404)
-            
-            # return jsonify ({
-            #     'success': True
-            #     # 'deleted': question_id
-            #     })
-            return jsonify ({
-                'success': True,
-                'questions': current_questions,
-                'total_questions': len(Question.query.all()), 
-                'current_category': None, 
-                'categories': {category.id: category.type for category in categories}
-                })
-        except Exception as e:
-            print(e)
-            abort(422)
+        return jsonify ({
+            'success': True,
+            'questions': current_questions,
+            'total_questions': len(Question.query.all()), 
+            'current_category': None, 
+            'categories': {category.id: category.type for category in categories}
+            })
 
     """
     @TODO:
@@ -156,18 +144,16 @@ def create_app(test_config=None):
             selection = Question.query.order_by(Question.id).all()
             current_question=paginate_questions(request,selection)
 
-            if len(current_question) == 0:
-                abort(404)
-        
             return jsonify ({
             'success': True,
             'created': question.id,
             'question': current_question,
             'total_questions': len(Question.query.all())            
             })
-        except:
+        except Exception as e:
+            print(e)
             abort(422)
-
+            
     """
     @TODO:
     Create a POST endpoint to get questions based on a search term.
@@ -183,23 +169,20 @@ def create_app(test_config=None):
         body = request.get_json()
         search_term = body.get("searchTerm", None)
 
-        try:
-            print ('Before Searching')
-            selection = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
-            print ('After Searching')
+        selection = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
+        
+        if selection:
             current_questions = paginate_questions(request, selection)
-            print (current_questions)
             return jsonify(
                 {
                     "success": True,
                     "questions": current_questions,
                     "total_questions": len(selection),
                     "current_category": None  
-                }
-            )
-        except:
-            abort(422)
-
+                })
+        else:                
+            abort(404)
+            
     """
     @TODO:
     Create a GET endpoint to get questions based on category.
@@ -210,24 +193,19 @@ def create_app(test_config=None):
     """
 
     @app.route("/categories/<int:category_id>/questions", methods=["GET"])
-    def get_questions(category_id):
+    def retreive_questions_by_category(category_id):
 
-        selection = Question.query.order_by(Question.id).filter(Question.category == category_id)
-
-        try:
-            current_questions=paginate_questions(request,selection)
-            current_category= Category.query.filter(Category.id == category_id)
-            if len(current_questions) == 0:
-                abort(404)
-        
-            return jsonify ({
-            'success': True,
-            'questions': current_questions,
-            'total_questions': len(current_questions),
-            'current_category': [category.type.format() for category in current_category]           
-            })
-        except:
-            abort(422)
+        selection = Question.query.order_by(Question.id).filter(Question.category == category_id)   
+        current_questions=paginate_questions(request,selection)
+        current_category= Category.query.filter(Category.id == category_id)
+        if len(current_questions) == 0:
+            abort(404)    
+        return jsonify ({
+        'success': True,
+        'questions': current_questions,
+        'total_questions': len(current_questions),
+        'current_category': [category.type.format() for category in current_category]           
+        })
 
     """
     @TODO:
@@ -262,8 +240,10 @@ def create_app(test_config=None):
                 'success': True,
                 'question': question.format()
             })
-        except:
+        except Exception as e:
+            print(e)
             abort(422)
+            
 
     """
     @TODO:
@@ -273,14 +253,14 @@ def create_app(test_config=None):
     @app.errorhandler(404)
     def not_found(error):
         return( 
-            jsonify({'success': False, 'error': 404,'message': 'resource not found'}),
+            jsonify({'success': False, 'error': 404,'message': 'Page not found'}),
             404
         )
         
     @app.errorhandler(422)
     def unprocessed(error):
         return(
-            jsonify({'success': False, 'error': 422,'message': 'request cannot be processed'}),
+            jsonify({'success': False, 'error': 422,'message': 'unprocessable'}),
             422
         )
 
@@ -294,7 +274,7 @@ def create_app(test_config=None):
     @app.errorhandler(405)
     def not_allowed(error):
         return(
-            jsonify({'success': False, 'error': 405,'message': 'method not alllowed'}),
+            jsonify({'success': False, 'error': 405,'message': 'method not allowed'}),
             405
         )
     
